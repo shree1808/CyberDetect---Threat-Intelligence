@@ -1,0 +1,34 @@
+# Core LangChain
+langchain
+langchain-core
+langchain-openrouter
+
+# LangGraph
+langgraph
+langgraph-checkpoint-postgres
+
+# Deep Agents / Agent Harness
+deepagents
+
+# OpenRouter / LLM API
+openai
+
+# Environment / Configuration
+python-dotenv
+
+# Data validation
+pydantic
+pydantic-settings
+
+# API layer
+fastapi
+uvicorn[standard]
+
+# Async HTTP
+httpx
+
+# Observability
+langsmith
+
+# Useful utilities
+tenacity

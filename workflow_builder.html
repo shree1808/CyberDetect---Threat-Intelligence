@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cyber-Detect · Workflow Builder</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--bd:#e4e7ec;--bd2:#d0d5dd;--tx:#101828;--tx2:#475467;--mu:#667085;--ac:#0f766e;--ac2:#115e59;--r:8px;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font:13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);background:var(--bg);display:flex}
+.rail{width:52px;flex:none;background:#0b2f2c;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
+.logo{width:30px;height:30px;border-radius:8px;background:#34d399;color:#06302b;font-weight:800;font-size:12px;display:grid;place-items:center;margin-bottom:12px}
+.rail i{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:#9fc5bf;font-style:normal;font-size:15px}.rail i.on{background:#ffffff1f;color:#fff}
+.app{flex:1;display:flex;flex-direction:column;min-width:0}
+header{display:flex;gap:12px;align-items:center;padding:0 16px;height:52px;flex:none;background:var(--card);border-bottom:1px solid var(--bd)}
+header span{display:flex;gap:8px}
+.crumb{display:flex;align-items:center;gap:8px;color:var(--mu)}.crumb i{color:var(--bd2);font-style:normal}.crumb b{color:var(--tx);font-size:14px;font-weight:600}
+.tag{font-style:normal;font-size:11px;padding:1px 8px;border-radius:99px;background:#f2f4f7;color:var(--tx2);border:1px solid var(--bd)}
+.tabs{display:flex;height:100%;gap:2px;margin:0 auto 0 12px}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--mu);padding:0 14px;height:100%;box-shadow:none}
+.tabs button:hover{background:none;color:var(--tx)}body.build #tb,body.chat #tc{color:var(--ac);border-bottom-color:var(--ac)}
+.ep{display:flex;align-items:center;gap:6px;color:var(--mu);font-size:12px}
+button{font:inherit;font-weight:500;padding:6px 12px;border:1px solid var(--bd2);background:var(--card);color:var(--tx);border-radius:var(--r);cursor:pointer;box-shadow:0 1px 1px #1018280d}
+button:hover{background:#f9fafb}button.pri{background:var(--ac);border-color:var(--ac2);color:#fff}button.pri:hover{background:var(--ac2)}button:disabled{opacity:.5;cursor:not-allowed}
+input{font:inherit;padding:6px 10px;border:1px solid var(--bd2);border-radius:var(--r);background:#fff}input:focus{outline:2px solid #99f6e4;border-color:var(--ac)}
+#api{width:200px;font:12px var(--mono)}
+main{flex:1;display:flex;min-height:0}
+.palette{width:240px;padding:14px 12px;background:var(--card);border-right:1px solid var(--bd);overflow:auto}
+.palette h3{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--mu);margin:16px 0 6px}.palette h3:first-child{margin-top:0}
+.pi{display:flex;gap:10px;align-items:center;padding:7px 8px;margin-bottom:2px;border:1px solid transparent;border-radius:var(--r);cursor:grab}
+.pi:hover{background:#f9fafb;border-color:var(--bd)}.pi b{display:block;font-weight:600}.pi small{display:block;color:var(--mu);font-size:11.5px}
+.ic{flex:none;width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font:700 10.5px var(--mono);color:var(--c);background:color-mix(in srgb,var(--c) 12%,#fff);border:1px solid color-mix(in srgb,var(--c) 30%,#fff)}
+.m .ic{width:22px;height:22px;font-size:9px}
+.muted{color:var(--mu);font-size:12px}.hint{margin-top:18px;padding-top:12px;border-top:1px solid var(--bd)}
+.cw{flex:1;overflow:auto;position:relative;min-width:0;background:var(--bg)}
+#board{position:relative;width:2000px;height:1000px;background-image:radial-gradient(#cfd4dc 1px,transparent 1px);background-size:22px 22px}
+svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hit{stroke:transparent;stroke-width:14;fill:none;pointer-events:stroke;cursor:pointer}
+.e{stroke:#98a2b3;stroke-width:2;fill:none}.hit:hover+.e{stroke:#d92d20}.tmp{stroke:var(--ac);stroke-width:2;stroke-dasharray:5 4;fill:none}
+#nodes{position:absolute;inset:0;pointer-events:none}
+.node{position:absolute;width:200px;height:58px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#fff;border:1px solid var(--bd2);border-radius:10px;box-shadow:0 1px 2px #1018280f;cursor:grab;user-select:none;touch-action:none;pointer-events:auto}
+.node:hover{box-shadow:0 4px 12px #10182814}.node.sel{border-color:var(--ac);box-shadow:0 0 0 3px #14b8a63a}
+.node b{display:block;font-size:13px;font-weight:600}.node small{font:11px var(--mono);color:var(--mu)}
+.port{position:absolute;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#fff;border:2px solid #98a2b3}
+.port.in{left:-7px}.port.out{right:-7px;cursor:crosshair}.port.out:hover{border-color:var(--ac);background:var(--ac)}
+.x{margin-left:auto;color:var(--mu);cursor:pointer;display:none;padding:0 4px;font-size:12px}.node:hover .x{display:block}
+.st-running{border-color:#2e90fa;box-shadow:0 0 0 3px #2e90fa33;animation:p 1.2s infinite}.st-done{border-color:#12b76a}.st-paused{border-color:#f79009;box-shadow:0 0 0 3px #f7900933}.st-error{border-color:#f04438}
+@keyframes p{50%{box-shadow:0 0 0 7px #2e90fa10}}
+#chat{flex:1.3;display:none;flex-direction:column;min-width:0;border-left:1px solid var(--bd);background:var(--card)}
+body.chat #chat{display:flex}body.chat .palette,body.chat #jsonwrap,body.chat .bo{display:none}
+body.build .co{display:none}body.chat .node,body.chat .hit{pointer-events:none}body.chat .x{display:none!important}
+#msgs{flex:1;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px;background:#fcfcfd}
+.m{max-width:88%;padding:12px 14px;border-radius:10px;border:1px solid var(--bd);background:#fff;box-shadow:0 1px 2px #1018280a}
+.m.u{align-self:flex-end;background:var(--ac);color:#fff;border-color:var(--ac2)}.m.e{border-color:#fda29b;background:#fffbfa}
+.m h4{margin:0 0 8px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px}.m p{margin:6px 0}.m ul{margin:6px 0 0;padding-left:18px}
+.m pre{white-space:pre-wrap;font:11px var(--mono);max-height:200px;overflow:auto;background:#f9fafb;border:1px solid var(--bd);padding:8px;border-radius:6px}
+.pill,.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#f2f4f7;color:var(--tx2)}
+.pill.ok,.low{background:#ecfdf3;color:#067647}.pill.bad,.critical{background:#fef3f2;color:#b42318}.pill.wait,.medium{background:#fffaeb;color:#b54708}.high{background:#fff4ed;color:#c4320a}
+.row{display:flex;gap:8px;margin-top:10px}.row input{flex:1;min-width:0}
+.chip{margin-top:4px;background:#f0fdfa;border-color:#99f6e4;color:var(--ac2)}
+#bar{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--bd);background:#fff}#bar input{flex:1;padding:9px 12px}
+#jsonwrap{background:#fff;border-top:1px solid var(--bd);padding:8px 16px;font-size:12px}#jsonwrap summary{cursor:pointer;color:var(--tx2);font-weight:500}
+#json{font:11.5px var(--mono);background:#f9fafb;border:1px solid var(--bd);border-radius:6px;padding:10px;max-height:180px;overflow:auto;margin:8px 0 0}
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#101828;color:#fff;padding:8px 14px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none}#toast.on{opacity:1}
+.m.sys{align-self:flex-start;max-width:100%;background:#f9fafb;box-shadow:none;padding:6px 10px;font-size:12px}
+code{font:12px var(--mono);color:var(--tx2);user-select:all}
+#empty{position:absolute;left:40px;top:40px;color:var(--mu);pointer-events:none}
+</style></head>
+<body class="build">
+<nav class="rail"><div class="logo">CD</div><i class="on" title="Workflows">&#9636;</i><i title="Runs">&#9719;</i><i title="Settings">&#9881;</i></nav>
+<div class="app">
+<header>
+  <div class="crumb"><span>Cyber-Detect</span><i>/</i><span>Workflows</span><i>/</i><b>Product risk assessment</b><em class="tag">Draft</em></div>
+  <div class="tabs"><button id="tb">Builder</button><button id="tc">Chat run</button></div>
+  <label class="ep">Endpoint<input id="api" title="API base URL"></label>
+  <span class="bo"><button id="clr">Clear</button><button id="fi" title="Shift-click 2+ nodes first">Fan-in selected</button><button id="go" class="pri">Start chat ▶</button></span>
+  <span class="co"><button id="edit">← Edit workflow</button><button id="nw">New chat</button></span>
+</header>
+<main>
+  <aside class="palette"><div id="pal"></div><p class="muted hint">Drag components onto the canvas, then drag from a node's right port to connect. Select a node and drop <b>Fan-out</b> to branch it in parallel; shift-click nodes and drop <b>Fan-in</b> to merge them — the Risk Aggregator attaches automatically. Click a line to remove it.</p></aside>
+  <div class="cw" id="cw"><div id="board"><div id="empty">Drag components from the left onto the canvas to build a workflow.</div><svg id="svg"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#94a3b8"/></marker></defs><g id="eg"></g></svg><div id="nodes"></div></div></div>
+  <section id="chat"><div id="msgs"></div><div id="bar"><input id="inp"><button id="snd" class="pri">Send</button></div></section>
+</main>
+<details id="jsonwrap"><summary>Blueprint JSON</summary><pre id="json"></pre></details></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),NS='http://www.w3.org/2000/svg',W=200,H=58;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PLUG={
+ product_profile:{label:'Product Profile',icon:'🧾',color:'#6366f1',desc:'Vendor, version, category'},
+ hitl_approval:{label:'Human Approval',icon:'🙋',color:'#f59e0b',desc:'Pause: approve / reject'},
+ cve_analysis:{label:'CVE Analysis',icon:'🛡️',color:'#ef4444',desc:'Known vulnerabilities'},
+ vendor_analysis:{label:'Vendor Analysis',icon:'🏢',color:'#0ea5e9',desc:'Reputation & maintenance'},
+ compliance:{label:'Compliance',icon:'📋',color:'#10b981',desc:'License & certifications'},
+ threat_intelligence:{label:'Threat Intel',icon:'🕵️',color:'#8b5cf6',desc:'Active exploitation'},
+ product_risk:{label:'Risk Aggregator',pal:'Fan-in',icon:'⚖️',color:'#0f172a',desc:'Joins branches → verdict'},
+ fan_out:{label:'Fan-out',icon:'FO',color:'#0369a1',desc:'Split into parallel branches'}};
+Object.entries({product_profile:'PP',hitl_approval:'HA',cve_analysis:'CV',vendor_analysis:'VN',compliance:'CO',threat_intelligence:'TI',product_risk:'Σ',fan_out:'FO'}).forEach(([k,a])=>PLUG[k].icon=a);
+let nodes=[],edges=[],sel=new Set(),seq=0,status={},done=new Set(),state='idle',pausedNode=null,wid=null,tok={};
+const byId=id=>nodes.find(n=>n.id===id),label=id=>PLUG[byId(id)?.plugin]?.label||id;
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2800)};
+$('#api').value=location.protocol==='file:'?'http://127.0.0.1:8000':location.origin;
+const API=()=>$('#api').value.trim().replace(/\/$/,'');
+const pt=e=>{const r=$('#board').getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+const curve=(a,b)=>{const d=Math.max(40,Math.abs(b.x-a.x)/2);return`M${a.x} ${a.y}C${a.x+d} ${a.y} ${b.x-d} ${b.y} ${b.x} ${b.y}`};
+
+const isSp=id=>byId(id)?.plugin==='fan_out';
+const srcOf=id=>edges.filter(e=>e.t===id).flatMap(e=>isSp(e.s)?srcOf(e.s):[e.s]);
+function flat(){   // real nodes + edges with splitters collapsed (source -> splitter -> targets  =>  source -> targets)
+ const out=[],seen=new Set();
+ edges.forEach(e=>{if(isSp(e.t))return;(isSp(e.s)?srcOf(e.s):[e.s]).forEach(s=>{const k=s+'>'+e.t;if(!seen.has(k)){seen.add(k);out.push({s,t:e.t})}})});
+ return{nodes:nodes.filter(n=>n.plugin!=='fan_out'),edges:out};
+}
+/* ---------- blueprint ---------- */
+function blueprint(){
+ const F=flat(),nodes=F.nodes,edges=F.edges,out=nodes.map(n=>({node:{node_name:n.plugin,node_route:n.id}}));
+ const inc=id=>edges.filter(e=>e.t===id).map(e=>e.s),outg=id=>edges.filter(e=>e.s===id).map(e=>e.t);
+ nodes.forEach(n=>{const i=inc(n.id),o=outg(n.id);
+  if(i.length>1)out.push({edge:{edge_type:'fan_in',sources:i,target:n.id}});
+  if(o.length>1)out.push({edge:{edge_type:'fan_out',source:n.id,targets:o}});});
+ edges.forEach(e=>{if(inc(e.t).length===1&&outg(e.s).length===1)out.push({edge:{edge_type:'next',source:e.s,target:e.t}})});
+ return out;
+}
+
+/* ---------- canvas ---------- */
+function addNode(plugin,x,y){const n={id:'node_'+String(++seq).padStart(3,'0'),plugin,x:Math.max(0,x),y:Math.max(0,y)};nodes.push(n);return n}
+function render(){$('#empty').style.display=nodes.length?'none':'block';
+ $('#nodes').innerHTML=nodes.map(n=>{const p=PLUG[n.plugin];
+  return`<div class="node st-${status[n.id]||'idle'}${sel.has(n.id)?' sel':''}" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px;--c:${p.color}"><span class="port in"></span><span class="ic">${p.icon}</span><div><b>${p.label}</b><small>${n.id}${n.plugin==='product_risk'?' · fan-in':n.plugin==='fan_out'?' · split':''}</small></div><span class="x">✕</span><span class="port out"></span></div>`}).join('');
+ renderEdges();$('#json').textContent=JSON.stringify(blueprint(),null,2);
+}
+function renderEdges(){
+ $('#eg').innerHTML=edges.map((e,i)=>{const s=byId(e.s),t=byId(e.t),d=curve({x:s.x+W,y:s.y+H/2},{x:t.x,y:t.y+H/2});
+  return`<path class="hit" data-i="${i}" d="${d}"><title>Click to remove</title></path><path class="e" d="${d}" marker-end="url(#ar)"/>`}).join('');
+}
+const reach=(a,b)=>{const seen=new Set(),st=[a];while(st.length){const x=st.pop();if(x===b)return true;if(seen.has(x))continue;seen.add(x);edges.filter(e=>e.s===x).forEach(e=>st.push(e.t))}return false};
+function connect(s,t){
+ if(s===t||edges.some(e=>e.s===s&&e.t===t))return;
+ if(reach(t,s))return toast('That would create a cycle');
+ if(byId(t).plugin!=='product_risk'&&edges.some(e=>e.t===t))return toast('Only the Fan-in aggregator can join branches — use Fan-in');
+ edges.push({s,t});render();
+}
+function fanIn(){
+ const ids=[...sel].filter(id=>byId(id)?.plugin!=='product_risk');
+ if(ids.length<2)return toast('Shift-click 2 or more nodes to fan them in');
+ const src=ids.map(byId),agg=addNode('product_risk',Math.max(...src.map(n=>n.x))+W+70,src.reduce((a,n)=>a+n.y,0)/src.length);
+ ids.forEach(id=>edges.push({s:id,t:agg.id}));sel.clear();sel.add(agg.id);render();
+}
+function fromPalette(k,x,y){
+ if(k==='product_risk'&&sel.size>=2)return fanIn();
+ if(k==='fan_out'&&sel.size===1){const s=byId([...sel][0]);
+  if(s&&s.plugin!=='fan_out'&&!edges.some(e=>e.s===s.id&&isSp(e.t))){const n=addNode(k,s.x+W+60,s.y);edges.push({s:s.id,t:n.id});sel.clear();sel.add(n.id);return render()}}   // aggregator attaches itself to the selection
+ const n=addNode(k,x,y);sel.clear();sel.add(n.id);render();
+}
+function removeNode(id){nodes=nodes.filter(n=>n.id!==id);edges=edges.filter(e=>e.s!==id&&e.t!==id);sel.delete(id);render()}
+function startLink(e,n){
+ e.preventDefault();const tmp=document.createElementNS(NS,'path');tmp.setAttribute('class','tmp');$('#svg').appendChild(tmp);
+ const a={x:n.x+W,y:n.y+H/2};
+ const mv=ev=>tmp.setAttribute('d',curve(a,pt(ev)));
+ const up=ev=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);tmp.remove();
+  const t=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.node');if(t)connect(n.id,t.dataset.id)};
+ addEventListener('pointermove',mv);addEventListener('pointerup',up);
+}
+$('#nodes').addEventListener('pointerdown',e=>{
+ const nd=e.target.closest('.node');if(!nd)return;const n=byId(nd.dataset.id);
+ if(e.target.closest('.x'))return removeNode(n.id);
+ if(e.target.closest('.out'))return startLink(e,n);
+ const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;let moved=false;
+ const mv=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>3)moved=true;
+  n.x=Math.max(0,ox+dx);n.y=Math.max(0,oy+dy);nd.style.left=n.x+'px';nd.style.top=n.y+'px';renderEdges()};
+ const up=ev=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);
+  if(!moved){if(ev.shiftKey||ev.ctrlKey||ev.metaKey)sel.has(n.id)?sel.delete(n.id):sel.add(n.id);else{sel.clear();sel.add(n.id)}}render()};
+ addEventListener('pointermove',mv);addEventListener('pointerup',up);
+});
+$('#board').addEventListener('pointerdown',e=>{if(e.target.id==='board'||e.target.id==='svg'){sel.clear();render()}});
+$('#eg').addEventListener('click',e=>{const h=e.target.closest('.hit');if(h){edges.splice(+h.dataset.i,1);render()}});
+addEventListener('keydown',e=>{if((e.key==='Delete'||e.key==='Backspace')&&document.body.className==='build'&&!/INPUT/.test(document.activeElement.tagName))[...sel].forEach(removeNode)});
+const GRP={Context:['product_profile'],Analysis:['cve_analysis','vendor_analysis','compliance','threat_intelligence'],Control:['hitl_approval','fan_out','product_risk']};
+$('#pal').innerHTML=Object.entries(GRP).map(([g,ks])=>`<h3>${g}</h3>`+ks.map(k=>{const p=PLUG[k];return`<div class="pi" draggable="true" data-k="${k}" style="--c:${p.color}"><span class="ic">${p.icon}</span><div><b>${p.pal||p.label}</b><small>${p.desc}</small></div></div>`}).join('')).join('');
+$('#pal').addEventListener('dragstart',e=>{const k=e.target.closest('.pi')?.dataset.k;if(k)e.dataTransfer.setData('text/plain',k)});
+$('#pal').addEventListener('click',e=>{const k=e.target.closest('.pi')?.dataset.k;if(k)fromPalette(k,40+(nodes.length%4)*30,40+(nodes.length%7)*80)});
+$('#cw').addEventListener('dragover',e=>e.preventDefault());
+$('#cw').addEventListener('drop',e=>{e.preventDefault();const k=e.dataTransfer.getData('text/plain');if(PLUG[k]){const p=pt(e);fromPalette(k,p.x-W/2,p.y-H/2)}});
+$('#fi').onclick=fanIn;
+$('#clr').onclick=()=>{nodes=[];edges=[];seq=0;sel.clear();render()};
+
+/* ---------- chat ---------- */
+function addMsg(html,cls=''){const d=document.createElement('div');d.className='m '+cls;d.innerHTML=html;$('#msgs').appendChild(d);$('#msgs').scrollTop=1e9;return d}
+function sync(){const b=state!=='idle';$('#inp').disabled=b;$('#snd').disabled=b;
+ $('#inp').placeholder=state==='paused'?'Waiting for your approval above…':state==='running'?'Workflow running…':'Which product should I assess? e.g. Terraform 1.9'}
+function refresh(){
+ const F=flat();nodes.forEach(n=>{if(isSp(n.id)){status[n.id]=done.size&&srcOf(n.id).every(p=>done.has(p))?'done':'idle';return}const pre=F.edges.filter(e=>e.t===n.id).map(e=>e.s);
+  status[n.id]=done.has(n.id)?'done':pausedNode===n.id?'paused':(state!=='idle'&&pre.every(p=>done.has(p)))?'running':'idle'});nodes.forEach(n=>status[n.id]==='running'&&live(n.id));render();
+}
+function reset(){done.clear();status={};state='idle';pausedNode=null;wid=null;tok={}}
+function setMode(m){
+ document.body.className=m;sel.clear();reset();
+ if(m==='chat'){$('#msgs').innerHTML='';intro()}
+ render();sync();
+}
+function intro(){
+ const F=flat(),lv={},f=id=>lv[id]??=Math.max(-1,...F.edges.filter(e=>e.t===id).map(e=>f(e.s)))+1,g=[];
+ F.nodes.forEach(n=>f(n.id));F.nodes.forEach(n=>(g[lv[n.id]]??=[]).push(label(n.id)));
+ const flow=g.filter(Boolean).map(a=>a.length>1?'('+a.join(' ‖ ')+')':a[0]).join(' → ');
+ addMsg(`<b>Workflow ready.</b> ${esc(flow)}`);
+}
+async function streamPost(path,body,onEv){
+ const res=await fetch(API()+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ if(!res.ok){let d='';try{const j=await res.json();d=typeof j.detail==='string'?j.detail:JSON.stringify(j.detail)}catch{}throw new Error(res.status+' '+d)}
+ const rd=res.body.getReader(),dec=new TextDecoder();let buf='';
+ for(;;){const{done:fin,value}=await rd.read();if(fin)break;buf+=dec.decode(value,{stream:true});let i;
+  while((i=buf.indexOf('\n\n'))>=0){const blk=buf.slice(0,i);buf=buf.slice(i+2);let ev='message',data='';
+   blk.split('\n').forEach(l=>{if(l.startsWith('event:'))ev=l.slice(6).trim();else if(l.startsWith('data:'))data+=l.slice(5).trim()});
+   if(data){try{onEv(ev,JSON.parse(data))}catch(err){console.error(err)}}}}
+}
+async function run(path,body){
+ try{await streamPost(path,body,onEvent)}
+ catch(e){addMsg('Error: '+esc(e.message)+(e instanceof TypeError?` — is the API running at ${esc(API())} with CORS enabled?`:''),'e');state='idle';refresh()}
+ if(state==='running')state='idle';refresh();sync();
+}
+function live(id){
+ const pl=byId(id)?.plugin;if(!pl||tok[id]||pl==='hitl_approval')return;
+ tok[id]=addMsg(`<h4><span class="ic" style="--c:${PLUG[pl].color}">${PLUG[pl].icon}</span>${esc(label(id))}<span class="pill">running…</span></h4><pre class="t" hidden></pre>`);
+}
+function onEvent(ev,d){
+ if(ev==='wf_started'){reset();state='running';wid=d.workflow_id;addMsg('<span class="pill">Workflow ID</span> <code>'+esc(wid)+'</code>','sys');refresh()}
+ else if(ev==='wf_resumed'){state='running';pausedNode=null;refresh()}
+ else if(ev==='node_token'){live(d.node);const b=tok[d.node];if(!b)return;const t=b.querySelector('.t');t.hidden=false;b.querySelector('.pill').textContent='streaming';t.textContent+=d.content;t.scrollTop=1e9;$('#msgs').scrollTop=1e9}
+ else if(ev==='node_completed'){tok[d.node]?.remove();done.add(d.node);result(d.node,d.event);refresh()}
+ else if(ev==='paused'){state='paused';pausedNode=d.node;refresh();approval(d)}
+ else if(ev==='workflow_completed'){state='idle';pausedNode=null;refresh();Object.values(tok).forEach(b=>b.remove());tok={};
+  addMsg(d.status==='rejected'?'<span class="pill bad">Stopped</span> Approval was rejected.':'<span class="pill ok">Complete</span> Ask about another product any time.')}
+ else if(ev==='error'){refresh();Object.values(tok).forEach(b=>b.remove());tok={};nodes.forEach(n=>{if(status[n.id]==='running')status[n.id]='error'});state='idle';render();addMsg('Error: '+esc(d.content),'e')}
+}
+function result(id,u){
+ if(!u||byId(id).plugin==='hitl_approval')return;
+ let h='';
+ if(u.product_profile){const q=u.product_profile;h+=`<b>${esc(q.vendor)} ${esc(q.product_name)} ${esc(q.version)}</b><div class="muted">${esc(q.category)} · ${esc(q.deployment)}</div>`}
+ for(const r of Object.values(u.reports||{})){
+  if(r.risk_level)h+=`<span class="badge ${r.risk_level}">${esc(r.risk_level)} · ${esc(r.risk_score)}</span> `;
+  if(r.recommendation)h+=`<span class="badge">${esc(r.recommendation.replace(/_/g,' '))}${r.confidence?' · '+esc(r.confidence)+' confidence':''}</span>`;
+  h+=`<p>${esc(r.summary)}</p>`;
+  if(r.cves?.length)h+='<ul>'+r.cves.slice(0,5).map(c=>`<li><b>${esc(c.cve_id)}</b> (${esc(c.severity)}) ${esc(c.summary)}</li>`).join('')+'</ul>';
+  const l=r.key_drivers||r.findings||[];if(l.length)h+='<ul>'+l.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>';
+ }
+ addMsg(`<h4><span class="ic" style="--c:${PLUG[byId(id).plugin].color}">${PLUG[byId(id).plugin].icon}</span>${esc(label(id))}</h4>${h}<details><summary class="muted">raw</summary><pre>${esc(JSON.stringify(u,null,1))}</pre></details>`);
+}
+function approval(d){
+ const desc=(d.event||[]).map(i=>(i.value?.action_requests||[]).map(a=>a.description).join('\n')).join('\n')||'Approval required';
+ const c=addMsg(`<h4><span class="pill wait">Awaiting approval</span>${esc(label(d.node))}</h4><p>${esc(desc)}</p><div class="row"><input placeholder="Optional comment"><button class="pri ok">Approve</button><button class="no">Reject</button></div>`);
+ const inp=c.querySelector('input');
+ const go=ok=>{c.querySelectorAll('button,input').forEach(x=>x.disabled=true);
+  c.insertAdjacentHTML('beforeend',`<p><span class="pill ${ok?'ok':'bad'}">${ok?'Approved':'Rejected'}</span>${inp.value?' '+esc(inp.value):''}</p>`);
+  state='running';sync();run('/cyber-detect/hitl_resume',{workflow_id:wid,approved:ok,comment:inp.value})};
+ c.querySelector('.ok').onclick=()=>go(true);c.querySelector('.no').onclick=()=>go(false);
+}
+function send(){
+ const q=$('#inp').value.trim();if(!q||state!=='idle')return;
+ $('#inp').value='';addMsg(esc(q),'u');state='running';sync();
+ run('/cyber-detect/start',{user_query:q,workflow_blueprint:blueprint()});
+}
+$('#snd').onclick=send;$('#inp').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+$('#go').onclick=()=>{if(!flat().nodes.length)return toast('Add at least one plugin first');const bad=nodes.find(n=>isSp(n.id)&&edges.filter(e=>e.s===n.id).length<2);if(bad)return toast('Fan-out needs at least 2 branches — connect it to two nodes');setMode('chat')};
+$('#edit').onclick=()=>setMode('build');$('#tb').onclick=()=>document.body.className==='build'||setMode('build');$('#tc').onclick=()=>document.body.className==='chat'||$('#go').click();$('#nw').onclick=()=>setMode('chat');
+render();
+</script>
+</body></html>
